@@ -24,19 +24,24 @@ app.post('/findUser', cors(corsOptions), async (req, res) => {
         method: 'GET',
         headers: headers
     }
-    var response = await fetch(url, fetchOptions);
-    var jsonResponse = await response.json();
-    var data = jsonResponse.data
-    if(data != null && data.username === userName) {
-        const requestEndpointUserTweets = `https://api.twitter.com/2/users/${data.id}/tweets`;
-        fetchOptions.params = {
-            "max_results": 10,
+    try {
+        var response = await fetch(url, fetchOptions);
+        var jsonResponse = await response.json();
+        var data = jsonResponse.data
+        if(data != null && data.username === userName) {
+            const requestEndpointUserTweets = `https://api.twitter.com/2/users/${data.id}/tweets`;
+            fetchOptions.params = {
+                "max_results": 10,
+            }
+            response = await fetch(requestEndpointUserTweets, fetchOptions);
+            jsonResponse = await response.json();
+            res.json(jsonResponse);
+        } else {
+            res.json({status: 404, text:"User not found"});
         }
-        response = await fetch(requestEndpointUserTweets, fetchOptions);
-        jsonResponse = await response.json();
-        res.json(jsonResponse);
-    } else {
-        res.json({status: 404, text:"User not found"});
+    } catch(err) {
+        res.json({status: 404, text:`Some Error occured: ${err}`});
+        console.log(`Some Error occured: ${err}`);
     }
 });
 
